@@ -83,6 +83,15 @@ is not a decision-quality compromise — only a "how authoritative is the
 exact price, and how long will this undocumented endpoint keep working"
 compromise. Revisit if a broker with real API access enters the picture.
 
+**Twelve Data was evaluated as a documented alternative and rejected, for
+now.** On the free tier it confirmed only FX pairs and gold spot; equity
+indices, other commodities, and bond futures either aren't covered or are
+explicitly gated behind a paid "Grow/Venture" plan (Twelve Data's own error
+message says so directly for silver, S&P 500, Nasdaq 100, and FTSE 100).
+Since equity indices carried most of the backtested edge, an FX-only
+upgrade wasn't worth the complexity of a second data source. Revisit if the
+paid tier's price and coverage are ever checked and look worthwhile.
+
 ## Layout
 
 ```
