@@ -1,0 +1,71 @@
+name: Check strategy
+
+# Runs the strategy tests on GitHub's servers, so it needs nothing installed
+# on your own machine. The full result appears in the run's log, and is also
+# attached as a downloadable file.
+#
+# This is the standalone version of this workflow: paths have no `fx-signals/`
+# prefix because this repo IS that directory, not a parent that contains it.
+# See the original at
+# https://github.com/rmitsos/Claude/blob/claude/forex-trading-consultant-orzly4/.github/workflows/check-strategy.yml
+# if you need the version with the prefix.
+#
+# Triggers:
+#   - automatically whenever the strategy script changes
+#   - manually, from the Actions tab, via "Run workflow"
+
+on:
+  push:
+    paths:
+      - "check_strategy.py"
+      - "check_universe.py"
+      - "src/lib/fx/**"
+      - "scripts/smoke-fetch.mjs"
+      - ".github/workflows/check-strategy.yml"
+  workflow_dispatch:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      # No dependencies to install — the script is deliberately stdlib only.
+      - name: FX breakout test
+        run: python3 check_strategy.py
+
+      # Runs even if the FX test failed -- they are independent questions.
+      - name: Diversified trend test
+        if: always()
+        run: python3 check_universe.py
+
+      # JS and Python are proven to agree on the MATH by test_universe_parity.py,
+      # which runs on synthetic prices and needs no network. What that test
+      # cannot check is whether prices.js's Yahoo fetch itself works on a real
+      # network -- the sandbox this app was built in blocks Yahoo entirely, so
+      # this is the first time that code path runs against the live internet.
+      - name: JS live price fetch
+        if: always()
+        run: node scripts/smoke-fetch.mjs
+
+      # Kept even when the run fails, because a failure caused by a blocked
+      # data source is itself the thing worth reading.
+      - name: Attach the result
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: strategy-check-result
+          path: |
+            strategy_check_output.txt
+            universe_check_output.txt
+          if-no-files-found: warn
