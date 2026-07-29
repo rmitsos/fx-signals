@@ -19,6 +19,10 @@ const CLASS_LABEL = {
 };
 const LABEL_BY_CODE = Object.fromEntries(UNIVERSE.map((u) => [u.code, u.label]));
 
+function slug(assetClass) {
+  return assetClass.replace(/\s+/g, "-");
+}
+
 function fmtPrice(value) {
   const v = Number(value);
   if (!Number.isFinite(v)) return "—";
@@ -286,6 +290,82 @@ export default async function UniversePage() {
         </p>
       </div>
 
+      {signals.length > 0 && (
+        <nav className="flex flex-wrap gap-x-3 gap-y-1 border-b border-rule bg-tint px-4 py-2 font-mono text-xs">
+          <a href="#how-to-read" className="text-ink-2 underline decoration-rule underline-offset-2">
+            How to read this
+          </a>
+          {CLASS_ORDER.filter((c) => signalsByClass[c]?.length).map((c) => (
+            <a key={c} href={`#${slug(c)}`} className="text-ink-2 underline decoration-rule underline-offset-2">
+              {CLASS_LABEL[c]}
+            </a>
+          ))}
+          <a href="#pnl" className="text-ink-2 underline decoration-rule underline-offset-2">P&amp;L</a>
+        </nav>
+      )}
+
+      <details id="how-to-read" className="border-b border-rule px-4 py-3 text-xs text-ink-2">
+        <summary className="cursor-pointer font-mono uppercase tracking-wide text-muted">
+          How to read this
+        </summary>
+        <dl className="mt-3 space-y-3">
+          <div>
+            <dt className="font-bold text-ink">LONG / SHORT / FLAT, with a number</dt>
+            <dd className="mt-0.5">
+              Direction, and the size of the position as a fraction of account
+              notional (1.00 = full account size, the maximum this strategy
+              ever takes). Size comes from volatility targeting — quieter
+              instruments get a bigger fraction, wilder ones a smaller one —
+              never from how strong the signal looks.
+            </dd>
+          </div>
+          <div>
+            <dt className="font-bold text-ink">The momentum bar</dt>
+            <dd className="mt-0.5">
+              Shows the instrument&apos;s trailing 12-month return — that&apos;s
+              the entire signal. Positive, it&apos;s long; negative, short.{" "}
+              <strong>The bar&apos;s width is not a confidence score.</strong> A
+              +3% reading is not a &quot;weaker&quot; long than a +25% reading —
+              both are simply long, and the strategy sizes both the same way
+              (by volatility, not by momentum strength). There is no way to
+              declare one instrument&apos;s signal &quot;better&quot; than
+              another&apos;s on a given day — the only evidence that exists is
+              the aggregate one above (Sharpe 0.54 / 0.28, t=1.5), which is a
+              property of following the rule uniformly across the whole book,
+              not of any single reading looking more convincing.
+            </dd>
+          </div>
+          <div>
+            <dt className="font-bold text-ink">Flips at</dt>
+            <dd className="mt-0.5">
+              The exact price from 12 months ago that today&apos;s price is
+              being compared against. Cross it, and the sign of the trailing
+              return — and the position — flips.
+            </dd>
+          </div>
+          <div>
+            <dt className="font-bold text-ink">Held</dt>
+            <dd className="mt-0.5">
+              Days since the position last changed direction, against the
+              ~{TYPICAL_HOLD_DAYS}-day average from the 25-year backtest.
+              There is no cap — a trend is allowed to run for as long as it
+              keeps going, which is also why some positions will sit for
+              months.
+            </dd>
+          </div>
+          <div>
+            <dt className="font-bold text-ink">Realized vol / Today, gross / financed</dt>
+            <dd className="mt-0.5">
+              Realized vol is the instrument&apos;s own recent annualised
+              volatility, which is what sizes the position. Today&apos;s
+              gross/financed figures are what that position earned today
+              specifically — before, and after, OANDA&apos;s admin fee — and
+              feed directly into the paper P&amp;L chart below.
+            </dd>
+          </div>
+        </dl>
+      </details>
+
       {signals.length === 0 ? (
         <div className="px-4 py-10 text-sm text-ink-2">
           <p className="mb-2">No signals stored yet.</p>
@@ -296,8 +376,16 @@ export default async function UniversePage() {
         </div>
       ) : (
         <>
-          <section className="border-b border-rule px-4 py-3">
-            <h2 className="mb-1 font-mono text-xs uppercase tracking-wide text-muted">Today</h2>
+          <section
+            className={
+              todaysChanges.length > 0
+                ? "border-b border-rule bg-fin/10 px-4 py-3"
+                : "border-b border-rule px-4 py-3"
+            }
+          >
+            <h2 className="mb-1 font-mono text-xs uppercase tracking-wide text-muted">
+              {todaysChanges.length > 0 ? `⚠ ${todaysChanges.length} change${todaysChanges.length > 1 ? "s" : ""} today` : "Today"}
+            </h2>
             {todaysChanges.length === 0 ? (
               <p className="text-sm text-ink-2">
                 No changes. Hold what you have.{" "}
@@ -327,7 +415,7 @@ export default async function UniversePage() {
             <ClassRollup signalsByClass={signalsByClass} />
           </section>
 
-          <section className="border-b border-rule px-4 py-4">
+          <section id="pnl" className="border-b border-rule px-4 py-4">
             <h2 className="mb-1 font-mono text-xs uppercase tracking-wide text-muted">
               Paper P&amp;L since tracking began
             </h2>
@@ -347,18 +435,30 @@ export default async function UniversePage() {
             </p>
           </section>
 
-          {CLASS_ORDER.filter((c) => signalsByClass[c]?.length).map((c) => (
-            <section key={c}>
-              <h2 className="border-b border-rule bg-tint px-4 py-2 font-mono text-xs uppercase tracking-wide text-muted">
-                {CLASS_LABEL[c]}
-              </h2>
-              {signalsByClass[c]
-                .sort((a, b) => a.code.localeCompare(b.code))
-                .map((s) => (
-                  <InstrumentCard key={s.code} s={s} />
-                ))}
-            </section>
-          ))}
+          {CLASS_ORDER.filter((c) => signalsByClass[c]?.length).map((c) => {
+            const rows = signalsByClass[c];
+            const hasActivity = rows.some(
+              (r) => Number(r.target) !== 0 || Number(r.target) !== Number(r.previous_target)
+            );
+            const long = rows.filter((r) => Number(r.target) > 0).length;
+            const short = rows.filter((r) => Number(r.target) < 0).length;
+
+            return (
+              <details key={c} id={slug(c)} open={hasActivity}>
+                <summary className="cursor-pointer border-b border-rule bg-tint px-4 py-2 font-mono text-xs uppercase tracking-wide text-muted">
+                  {CLASS_LABEL[c]}{" "}
+                  <span className="normal-case text-muted/70">
+                    ({rows.length} · {long} long, {short} short, {rows.length - long - short} flat)
+                  </span>
+                </summary>
+                {rows
+                  .sort((a, b) => a.code.localeCompare(b.code))
+                  .map((s) => (
+                    <InstrumentCard key={s.code} s={s} />
+                  ))}
+              </details>
+            );
+          })}
         </>
       )}
 
