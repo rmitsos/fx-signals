@@ -1,0 +1,22 @@
+{
+  "_comment": "Copy to config.json and edit. cost_bps must be YOUR broker's real one-way cost, not this placeholder.",
+
+  "account_equity": 10000,
+  "strategy": "donchian",
+  "params": { "lookback": 20 },
+  "max_hold": 10,
+
+  "vol_target": 0.10,
+  "max_leverage": 1.0,
+  "rebalance_band": 0.25,
+  "cost_bps": 1.0,
+
+  "pairs": {
+    "EURUSD": "stooq:eurusd",
+    "USDJPY": "stooq:usdjpy",
+    "GBPUSD": "stooq:gbpusd",
+    "AUDUSD": "stooq:audusd",
+    "USDCHF": "stooq:usdchf",
+    "USDCAD": "stooq:usdcad"
+  }
+}

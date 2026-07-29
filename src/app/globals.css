@@ -1,0 +1,47 @@
+@import "tailwindcss";
+
+@theme inline {
+  --color-ground: var(--ground);
+  --color-tint: var(--tint);
+  --color-ink: var(--ink);
+  --color-ink-2: var(--ink-2);
+  --color-muted: var(--muted);
+  --color-rule: var(--rule);
+  --color-fin: var(--fin);
+  --color-enr: var(--enr);
+  --font-mono: ui-monospace, "SF Mono", "Cascadia Mono", Menlo, Consolas, monospace;
+}
+
+/* Dark by default: this is a terminal you glance at, not something you read
+   for an hour. `fin` is the long colour, `enr` the short one — deliberately
+   amber rather than red, because a short is a position, not an error. */
+:root {
+  --ground: #0c1015;
+  --tint: #17202b;
+  --ink: #e7ebf0;
+  --ink-2: #a8b2bd;
+  --muted: #6f7b88;
+  --rule: #1f2730;
+  --fin: #4fb098;
+  --enr: #d2954b;
+  color-scheme: dark;
+}
+
+@media (prefers-color-scheme: light) {
+  :root {
+    --ground: #faf9f6;
+    --tint: #f3efe7;
+    --ink: #14171a;
+    --ink-2: #4a5158;
+    --muted: #838a90;
+    --rule: #e6e3dd;
+    --fin: #146b57;
+    --enr: #a85d1b;
+    color-scheme: light;
+  }
+}
+
+body {
+  background: var(--ground);
+  color: var(--ink);
+}
