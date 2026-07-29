@@ -1,0 +1,29 @@
+name: Check Twelve Data coverage
+
+# One-off diagnostic, not a per-push check: does Twelve Data actually carry
+# all 22 instruments this dashboard tracks? Manual trigger only, since this
+# burns real API calls against a rate-limited plan and there's no reason to
+# run it automatically.
+#
+# Requires the TWELVE_DATA_API_KEY repository secret to be set
+# (Settings -> Secrets and variables -> Actions -> New repository secret).
+
+on:
+  workflow_dispatch:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Coverage check
+        env:
+          TWELVE_DATA_API_KEY: ${{ secrets.TWELVE_DATA_API_KEY }}
+        run: node scripts/check-twelvedata-coverage.mjs
