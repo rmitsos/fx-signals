@@ -1,0 +1,30 @@
+name: Check Twelve Data direct symbols
+
+# Follow-up to "Check Twelve Data coverage": that workflow's symbol_search
+# approach returned only Common Stock/ETF/Mutual Fund/Warrant types across
+# every non-FX query, never a raw commodity/index/bond type -- suggesting a
+# blind spot in fuzzy search rather than the data being absent. This bypasses
+# search and hits Twelve Data's own documented direct symbols. A separate
+# workflow so it can be re-run alone without repeating the ~4-minute scan.
+#
+# Requires the TWELVE_DATA_API_KEY repository secret.
+
+on:
+  workflow_dispatch:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Direct symbol check
+        env:
+          TWELVE_DATA_API_KEY: ${{ secrets.TWELVE_DATA_API_KEY }}
+        run: node scripts/check-twelvedata-direct.mjs

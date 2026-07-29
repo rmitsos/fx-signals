@@ -23,7 +23,7 @@ jobs:
         with:
           node-version: "22"
 
-      - name: Coverage check
+      - name: Coverage check (symbol_search based)
         env:
           TWELVE_DATA_API_KEY: ${{ secrets.TWELVE_DATA_API_KEY }}
         run: node scripts/check-twelvedata-coverage.mjs
