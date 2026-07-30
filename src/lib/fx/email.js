@@ -5,11 +5,16 @@
 // themselves from being computed and stored -- that database row is the
 // actual record -- so failures here are returned as a value, not thrown.
 
+import { DISPLAY_EQUITY, TYPICAL_HOLD_DAYS, STRATEGY } from "./config";
+import { buildNarrative, fromComputedRow } from "./narrative";
+
 const RESEND_URL = "https://api.resend.com/emails";
 
 /**
  * @param changes  array of changed rows from runSignalUpdate — each needs
- *                 code, assetClass, target, previousTarget, reason.
+ *                 code, assetClass, target, previousTarget, plus whatever
+ *                 buildNarrative/fromComputedRow read (momentum, trigger,
+ *                 distanceToTrigger, barsHeld).
  * @param asof     the date these changes were decided.
  */
 export async function sendChangeEmail({ changes, asof }) {
@@ -26,7 +31,12 @@ export async function sendChangeEmail({ changes, asof }) {
 
   const lines = changes.map((c) => {
     const dir = c.target > c.previousTarget ? "LONG" : c.target < c.previousTarget ? "SHORT" : "FLAT";
-    return `${c.code} (${c.assetClass}) -> ${dir} ${Math.abs(c.target).toFixed(2)}\n  ${c.reason}`;
+    const narrative = buildNarrative(fromComputedRow(c), {
+      displayEquity: DISPLAY_EQUITY,
+      typicalHoldDays: TYPICAL_HOLD_DAYS,
+      lookbackDays: STRATEGY.lookback,
+    });
+    return `${c.code} (${c.assetClass}) -> ${dir} ${Math.abs(c.target).toFixed(2)}\n  ${narrative}`;
   });
 
   const subject = `Signal change (${changes.length}) — ${asof}`;

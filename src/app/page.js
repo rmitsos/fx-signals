@@ -4,6 +4,7 @@ import {
 } from "@/lib/fx/config";
 import { getLatestSignals, getRecentChanges, getPortfolioSeries } from "@/lib/fx/store";
 import { STALE_AFTER_DAYS } from "@/lib/fx/signals";
+import { buildNarrative, fromDbRow } from "@/lib/fx/narrative";
 
 // Access is enforced in proxy.js before this ever renders; robots.js and the
 // layout's metadata keep it out of search regardless.
@@ -94,7 +95,13 @@ function InstrumentCard({ s }) {
         <State target={target} />
       </header>
 
-      <p className="mb-2 text-sm text-ink-2">{s.reason}</p>
+      <p className="mb-2 text-sm text-ink-2">
+        {buildNarrative(fromDbRow(s), {
+          displayEquity: DISPLAY_EQUITY,
+          typicalHoldDays: TYPICAL_HOLD_DAYS,
+          lookbackDays: STRATEGY.lookback,
+        })}
+      </p>
 
       <MomentumBar momentum={momentum} />
 
@@ -399,13 +406,24 @@ export default async function UniversePage() {
                 </span>
               </p>
             ) : (
-              <ul className="space-y-1 font-mono text-sm">
+              <ul className="space-y-2">
                 {todaysChanges.map((s) => (
-                  <li key={s.code}>
-                    <strong className={Number(s.target) > Number(s.previous_target) ? "text-fin" : "text-enr"}>
-                      {Number(s.target) > Number(s.previous_target) ? "BUY " : "SELL"}
-                    </strong>{" "}
-                    {s.code} → {Number(s.target).toFixed(2)}
+                  <li key={s.code} className="font-mono text-sm">
+                    <div>
+                      <strong className={Number(s.target) > Number(s.previous_target) ? "text-fin" : "text-enr"}>
+                        {Number(s.target) > Number(s.previous_target) ? "BUY " : "SELL"}
+                      </strong>{" "}
+                      {s.code}{" "}
+                      <span className="text-muted">({LABEL_BY_CODE[s.code] || s.code})</span> →{" "}
+                      {Number(s.target).toFixed(2)}
+                    </div>
+                    <p className="mt-0.5 font-sans text-xs text-ink-2">
+                      {buildNarrative(fromDbRow(s), {
+                        displayEquity: DISPLAY_EQUITY,
+                        typicalHoldDays: TYPICAL_HOLD_DAYS,
+                        lookbackDays: STRATEGY.lookback,
+                      })}
+                    </p>
                   </li>
                 ))}
               </ul>
