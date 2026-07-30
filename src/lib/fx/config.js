@@ -6,35 +6,33 @@
 // mode this whole project exists to design around. Changing these means a
 // commit, a diff, and a deploy.
 //
-// This is the exact configuration check_universe.py measured on 25 years of
-// real prices: 252-day (12-month) momentum, no holding cap, equal risk per
-// instrument, across four asset classes. Gross Sharpe 0.54 (t=2.9 -- real).
-// After OANDA's CFD financing: Sharpe 0.28 (t=1.5 -- no longer distinguishable
-// from luck). See forex/README.md before treating this as more than a paper
-// record worth watching.
+// check_universe.py originally tested 22 instruments and assumed all of them
+// were available as OANDA CFDs -- that assumption was wrong. Confirmed by
+// hand, symbol by symbol, on the actual OANDA EU (TMS Brokers) account this
+// dashboard serves: only 14 of the 22 exist. Bonds and agriculture drop out
+// entirely, not just a name or two. check_universe_oanda.py re-ran the exact
+// same backtest on exactly these 14 rather than assuming the full-universe
+// number would carry over: gross Sharpe 0.50, financed Sharpe 0.29 (t=1.6)
+// -- essentially unchanged from the 22-instrument result (0.54 / 0.28,
+// t=1.5). Still marginal, still not proven, but losing bonds and
+// agriculture cost almost nothing. See forex/README.md.
 
-// name, Yahoo ticker, asset class -- identical to UNIVERSE in
-// forex/check_universe.py. Keep the two lists in sync by hand; the parity
-// test checks the math, not that the instrument lists match.
+// code is deliberately OANDA's own symbol name where one exists (US500, not
+// SPX), so what this dashboard says IS what you would type into the
+// platform -- no translation step between reading a signal and finding the
+// instrument. ticker is the Yahoo ticker used to fetch prices; identical set
+// to check_universe_oanda.py's OANDA_UNIVERSE. Keep the two in sync by hand.
 export const UNIVERSE = [
   { code: "GOLD", ticker: "GC=F", label: "Gold", assetClass: "metals" },
   { code: "SILVER", ticker: "SI=F", label: "Silver", assetClass: "metals" },
-  { code: "COPPER", ticker: "HG=F", label: "Copper", assetClass: "metals" },
-  { code: "WTI", ticker: "CL=F", label: "WTI Crude", assetClass: "energy" },
-  { code: "BRENT", ticker: "BZ=F", label: "Brent Crude", assetClass: "energy" },
+  { code: "WTICO", ticker: "CL=F", label: "WTI Crude", assetClass: "energy" },
+  { code: "BCO", ticker: "BZ=F", label: "Brent Crude", assetClass: "energy" },
   { code: "NATGAS", ticker: "NG=F", label: "Natural Gas", assetClass: "energy" },
-  { code: "CORN", ticker: "ZC=F", label: "Corn", assetClass: "agriculture" },
-  { code: "WHEAT", ticker: "ZW=F", label: "Wheat", assetClass: "agriculture" },
-  { code: "SOYBEANS", ticker: "ZS=F", label: "Soybeans", assetClass: "agriculture" },
-  { code: "SUGAR", ticker: "SB=F", label: "Sugar", assetClass: "agriculture" },
-  { code: "SPX", ticker: "^GSPC", label: "S&P 500", assetClass: "equity index" },
-  { code: "NDX", ticker: "^NDX", label: "Nasdaq 100", assetClass: "equity index" },
-  { code: "DAX", ticker: "^GDAXI", label: "DAX", assetClass: "equity index" },
-  { code: "FTSE", ticker: "^FTSE", label: "FTSE 100", assetClass: "equity index" },
-  { code: "NIKKEI", ticker: "^N225", label: "Nikkei 225", assetClass: "equity index" },
-  { code: "ASX", ticker: "^AXJO", label: "ASX 200", assetClass: "equity index" },
-  { code: "UST10Y", ticker: "ZN=F", label: "US 10y Note", assetClass: "bonds" },
-  { code: "UST30Y", ticker: "ZB=F", label: "US 30y Bond", assetClass: "bonds" },
+  { code: "US500", ticker: "^GSPC", label: "S&P 500", assetClass: "equity index" },
+  { code: "DE30", ticker: "^GDAXI", label: "DAX", assetClass: "equity index" },
+  { code: "UK100", ticker: "^FTSE", label: "FTSE 100", assetClass: "equity index" },
+  { code: "JP225", ticker: "^N225", label: "Nikkei 225", assetClass: "equity index" },
+  { code: "AU200", ticker: "^AXJO", label: "ASX 200", assetClass: "equity index" },
   { code: "EURUSD", ticker: "EURUSD=X", label: "Euro / US Dollar", assetClass: "currencies" },
   { code: "GBPUSD", ticker: "GBPUSD=X", label: "Sterling / US Dollar", assetClass: "currencies" },
   { code: "USDJPY", ticker: "USDJPY=X", label: "US Dollar / Yen", assetClass: "currencies" },
@@ -65,9 +63,7 @@ export const COST_BPS = 2.0;
 export const ADMIN_FEES = {
   metals: 0.01,
   energy: 0.025,
-  agriculture: 0.025,
   "equity index": 0.025,
-  bonds: 0.025,
   currencies: 0.01,
 };
 

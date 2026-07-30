@@ -229,9 +229,10 @@ export default async function UniversePage() {
   // is worse than showing nothing, because stale positions look current.
   await connection();
 
+  const activeCodes = UNIVERSE.map((u) => u.code);
   const [signals, changes, portfolio] = await Promise.all([
-    getLatestSignals(STRATEGY.strategy),
-    getRecentChanges(STRATEGY.strategy, 30),
+    getLatestSignals(STRATEGY.strategy, activeCodes),
+    getRecentChanges(STRATEGY.strategy, activeCodes, 30),
     getPortfolioSeries(),
   ]);
 
@@ -273,13 +274,16 @@ export default async function UniversePage() {
           order is placed by anything here and no broker is connected.
         </p>
         <p className="mb-2">
-          On 25 years of real prices across these instruments: gross Sharpe{" "}
-          <strong>0.54</strong> (t=2.9 — a real signal, beating a coin flip
-          clearly). After OANDA&apos;s CFD admin fee: Sharpe <strong>0.28</strong>{" "}
-          (t=1.5 — no longer distinguishable from luck). The edge is real; the
-          broker&apos;s financing takes roughly half of it. Currencies
-          contributed nothing in either test; equity indices carried most of
-          the edge.
+          These 14 instruments are exactly what was confirmed, symbol by
+          symbol, on the actual OANDA EU account this dashboard serves — the
+          original research covered 22, but bonds and agriculture don&apos;t
+          exist as CFDs here. Re-tested on exactly this narrower set rather
+          than assuming the number would carry over: gross Sharpe{" "}
+          <strong>0.50</strong> (financed <strong>0.29</strong>, t=1.6) on 25
+          years of real prices — essentially unchanged from the full
+          22-instrument result (0.54 / 0.28, t=1.5). Losing bonds and
+          agriculture cost almost nothing; metals (gold and silver) carried
+          most of the edge here.
         </p>
         <p>
           Exit is trend reversal only, exactly as tested — <strong>no
@@ -330,7 +334,7 @@ export default async function UniversePage() {
               (by volatility, not by momentum strength). There is no way to
               declare one instrument&apos;s signal &quot;better&quot; than
               another&apos;s on a given day — the only evidence that exists is
-              the aggregate one above (Sharpe 0.54 / 0.28, t=1.5), which is a
+              the aggregate one above (Sharpe 0.50 / 0.29, t=1.6), which is a
               property of following the rule uniformly across the whole book,
               not of any single reading looking more convincing.
             </dd>

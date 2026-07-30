@@ -118,25 +118,35 @@ export async function savePortfolioDay(row) {
   `;
 }
 
-/** The most recent row per instrument — what the rule wants right now. */
-export async function getLatestSignals(strategy) {
+/**
+ * The most recent row per instrument — what the rule wants right now.
+ *
+ * Filtered to `codes` (the current UNIVERSE) rather than "every code ever
+ * stored". Without this, retiring an instrument from config.js -- as
+ * happened when the universe narrowed from 22 to the 14 actually tradeable
+ * at OANDA -- would leave its last-known row on the dashboard forever,
+ * ageing into an increasingly stale ghost that nothing ever refreshes or
+ * removes.
+ */
+export async function getLatestSignals(strategy, codes) {
   if (!sql) return [];
   await ensureFxSchema();
   return sql`
     SELECT DISTINCT ON (code) *
     FROM universe_signals
-    WHERE strategy = ${strategy}
+    WHERE strategy = ${strategy} AND code = ANY(${codes})
     ORDER BY code, asof DESC
   `;
 }
 
-/** Recent position changes — the trade log, newest first. */
-export async function getRecentChanges(strategy, limit = 30) {
+/** Recent position changes — the trade log, newest first. Same filter, same reason. */
+export async function getRecentChanges(strategy, codes, limit = 30) {
   if (!sql) return [];
   await ensureFxSchema();
   return sql`
     SELECT * FROM universe_signals
-    WHERE strategy = ${strategy} AND target IS DISTINCT FROM previous_target
+    WHERE strategy = ${strategy} AND code = ANY(${codes})
+      AND target IS DISTINCT FROM previous_target
     ORDER BY asof DESC, code
     LIMIT ${limit}
   `;

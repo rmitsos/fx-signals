@@ -14,7 +14,11 @@ This tests the configuration that literature actually supports:
     Moskowitz, Ooi & Pedersen (2012)
   - no holding-period cap, so winners are allowed to run
   - roughly 22 instruments across commodities, stock indices, bonds and
-    currencies -- all four classes, all available on OANDA as CFDs
+    currencies -- all four classes. CORRECTION: this assumed all 22 were
+    available on OANDA as CFDs; confirmed by hand on the actual account this
+    project serves, only 14 are (see check_universe_oanda.py). Left here
+    struck through in spirit rather than quietly fixed, so the mistake stays
+    visible -- the earlier claim was never actually checked.
   - each position sized to equal risk, so a quiet bond and a wild natural
     gas contract contribute the same amount of volatility
 

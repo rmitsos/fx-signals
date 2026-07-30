@@ -51,6 +51,15 @@ it (currencies contributed nothing, in two separate tests). But OANDA's CFD
 admin fee (2.5%/yr on most classes, charged whether you're long or short)
 eats roughly half of it. What's left is too thin to trade with confidence.
 
+**Update: only 14 of these 22 are actually tradeable.** Confirmed by hand,
+symbol by symbol, on the real OANDA EU (TMS Brokers) account this dashboard
+serves — bonds and agriculture don't exist as CFDs here, not just a name or
+two. Re-tested on exactly the confirmed 14 rather than assuming the number
+would survive losing two asset classes (`check_universe_oanda.py`): gross
+Sharpe 0.50, financed 0.29, t=1.6 — essentially unchanged. Gold and silver
+carried most of the edge in this narrower set. The live dashboard runs on
+these 14, not the original 22.
+
 See `forex/README.md` for the full walk from a losing short-term FX idea to
 this, and `forex/DEPLOYMENT.md` for the deployment gates that still apply
 before any of it should touch money.
@@ -97,7 +106,7 @@ paid tier's price and coverage are ever checked and look worthwhile.
 ```
 src/lib/fx/strategy.js   the signal math: donchian (legacy) + tsm (live), no deps
 src/lib/fx/prices.js     daily closes from Yahoo's chart endpoint
-src/lib/fx/config.js     the 22-instrument universe and strategy params —
+src/lib/fx/config.js     the 14-instrument universe and strategy params —
                          edited by commit, not at runtime
 src/lib/fx/signals.js    orchestration: fetch, compute, persist, roll up
 src/lib/fx/store.js      daily snapshots + the running paper P&L, in Postgres
@@ -110,11 +119,20 @@ src/proxy.js             access gate — nothing is served without the secret
                          it must sit beside app/, so src/ and not the root)
 scripts/smoke-fetch.mjs  live-network check of the Yahoo fetch (see Tests)
 
-forex/                   the Python research kit (backtests, walk-forward)
-forex/README.md          the full result and how the search got here
-forex/DEPLOYMENT.md      deployment, broker APIs, and the gates before live
-forex/check_universe.py  the diversified-trend test — the one that mattered
-forex/check_strategy.py  the earlier FX-only test — kept for the contrast
+forex/                       the Python engine (fxlab), tests, and docs
+forex/README.md              the full result and how the search got here
+forex/DEPLOYMENT.md          deployment, broker APIs, and the gates before live
+
+check_universe.py            the 22-instrument diversified-trend test — the
+                              one that found the edge in the first place
+check_universe_oanda.py      the same test on only the 14 instruments
+                              actually confirmed tradeable at OANDA (EU) —
+                              this is the one the live dashboard matches
+check_universe_multispeed.py tested whether combining 1/3/12-month signals
+                              beats the single 252-day one -- it doesn't,
+                              kept as a record of a documented idea that
+                              didn't transfer to this data
+check_strategy.py            the earlier FX-only test — kept for the contrast
 ```
 
 ## Moving this into its own repository
