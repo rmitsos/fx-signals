@@ -21,6 +21,7 @@ on:
       - "check_universe.py"
       - "check_universe_multispeed.py"
       - "check_universe_oanda.py"
+      - "check_volume_exhaustion.py"
       - "src/lib/fx/**"
       - "scripts/smoke-fetch.mjs"
       - ".github/workflows/check-strategy.yml"
@@ -65,6 +66,14 @@ jobs:
         if: always()
         run: python3 check_universe_oanda.py
 
+      # Does forcing flat when an instrument's own volume fades below its
+      # recent average improve on the plain rule? Only testable on the 5
+      # OANDA instruments where Yahoo reports real futures volume -- FX has
+      # no consolidated volume at all, and index-level tickers report zero.
+      - name: Volume-exhaustion overlay test
+        if: always()
+        run: python3 check_volume_exhaustion.py
+
       # JS and Python are proven to agree on the MATH by test_universe_parity.py,
       # which runs on synthetic prices and needs no network. What that test
       # cannot check is whether prices.js's Yahoo fetch itself works on a real
@@ -86,4 +95,5 @@ jobs:
             universe_check_output.txt
             universe_multispeed_output.txt
             universe_oanda_output.txt
+            volume_exhaustion_output.txt
           if-no-files-found: warn
