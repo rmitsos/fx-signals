@@ -20,6 +20,7 @@ on:
       - "check_strategy.py"
       - "check_universe.py"
       - "check_universe_multispeed.py"
+      - "check_universe_oanda.py"
       - "src/lib/fx/**"
       - "scripts/smoke-fetch.mjs"
       - ".github/workflows/check-strategy.yml"
@@ -57,6 +58,13 @@ jobs:
         if: always()
         run: python3 check_universe_multispeed.py
 
+      # Confirmed by hand on the actual OANDA EU account this dashboard
+      # serves: only 14 of the 22 instruments have a real equivalent, and
+      # bonds + agriculture drop out entirely, not just a name or two.
+      - name: OANDA-tradeable subset test
+        if: always()
+        run: python3 check_universe_oanda.py
+
       # JS and Python are proven to agree on the MATH by test_universe_parity.py,
       # which runs on synthetic prices and needs no network. What that test
       # cannot check is whether prices.js's Yahoo fetch itself works on a real
@@ -77,4 +85,5 @@ jobs:
             strategy_check_output.txt
             universe_check_output.txt
             universe_multispeed_output.txt
+            universe_oanda_output.txt
           if-no-files-found: warn

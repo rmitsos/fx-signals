@@ -1,0 +1,45 @@
+==========================================================================
+  THE EDGE, RESTRICTED TO WHAT'S ACTUALLY TRADEABLE AT OANDA (EU)
+==========================================================================
+
+14 of 22 instruments confirmed on the account.
+Dropped entirely: Copper, Corn, Wheat, Soybeans, Sugar, Nasdaq 100, US 10y note, US 30y bond
+(bonds and agriculture as whole asset classes -- not cherry-picked names)
+
+Downloading ~25 years of daily prices for the confirmed 14...
+  14 of 14 instruments loaded.
+
+--------------------------------------------------------------------------
+14-INSTRUMENT (OANDA) RESULT AT DIFFERENT COST LEVELS
+--------------------------------------------------------------------------
+cost                      gross Sharpe  financed Sharpe   return/yr  worst fall
+free (impossible)                 0.59            -0.14      -0.4%      -14.6%
+2 bp per trade                    0.50            -0.23      -0.6%      -16.9%
+5 bp per trade                    0.36            -0.36      -0.9%      -21.5%
+15 bp per trade                  -0.10            -0.82      -2.1%      -39.1%
+
+For reference, the full 22-instrument result at 2bp (from
+check_universe.py): gross Sharpe 0.54, financed Sharpe 0.28, t=1.5.
+
+--------------------------------------------------------------------------
+BY ASSET CLASS (2 bp, financed)
+--------------------------------------------------------------------------
+metals             2 instruments   Sharpe   0.03     -0.0%/yr
+energy             3 instruments   Sharpe  -0.20     -1.2%/yr
+equity index       5 instruments   Sharpe  -0.35     -1.5%/yr
+currencies         4 instruments   Sharpe   0.11      0.4%/yr
+
+==========================================================================
+  WHAT THIS MEANS
+==========================================================================
+
+  14-instrument, financed: Sharpe -0.23, t=-1.1, return -0.6%/yr, worst fall -16.9%
+  22-instrument, financed (reference): Sharpe 0.28, t=1.5
+
+DOES NOT HOLD UP. Whatever edge existed in the full 22-instrument
+test depended more than expected on bonds and/or agriculture.
+What is actually available at OANDA (EU) does not show it.
+
+--------------------------------------------------------------------------
+Saved to universe_oanda_output.txt
+--------------------------------------------------------------------------
