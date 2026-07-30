@@ -15,7 +15,7 @@ import { fetchDailyCloses } from "../src/lib/fx/prices.js";
 import { runStrategy, explain } from "../src/lib/fx/strategy.js";
 import { UNIVERSE, STRATEGY, MIN_BARS } from "../src/lib/fx/config.js";
 
-const SAMPLE = ["GOLD", "SPX", "EURUSD"]; // one per how differently Yahoo serves them: future, index, FX
+const SAMPLE = ["GOLD", "US500", "EURUSD"]; // one per how differently Yahoo serves them: future, index, FX
 
 async function main() {
   let failures = 0;
