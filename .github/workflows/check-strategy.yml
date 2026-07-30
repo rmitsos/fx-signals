@@ -19,6 +19,7 @@ on:
     paths:
       - "check_strategy.py"
       - "check_universe.py"
+      - "check_universe_multispeed.py"
       - "src/lib/fx/**"
       - "scripts/smoke-fetch.mjs"
       - ".github/workflows/check-strategy.yml"
@@ -49,6 +50,13 @@ jobs:
         if: always()
         run: python3 check_universe.py
 
+      # Does combining 1/3/12-month trend speeds beat the single 252-day
+      # signal? AQR's own published methodology, not something searched for
+      # on this data.
+      - name: Multi-speed ensemble test
+        if: always()
+        run: python3 check_universe_multispeed.py
+
       # JS and Python are proven to agree on the MATH by test_universe_parity.py,
       # which runs on synthetic prices and needs no network. What that test
       # cannot check is whether prices.js's Yahoo fetch itself works on a real
@@ -68,4 +76,5 @@ jobs:
           path: |
             strategy_check_output.txt
             universe_check_output.txt
+            universe_multispeed_output.txt
           if-no-files-found: warn
