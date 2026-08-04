@@ -344,6 +344,40 @@ export default async function UniversePage() {
         </summary>
         <dl className="mt-3 space-y-3">
           <div>
+            <dt className="font-bold text-ink">Sharpe, t-stat, and return/yr — the numbers in the banner above</dt>
+            <dd className="mt-0.5">
+              Return/yr is the plain answer to &quot;how much did this
+              make&quot; — the account&apos;s actual annual growth rate.
+              Sharpe answers a different question: return divided by how
+              bumpy the ride was to get there. Return can always be
+              inflated just by sizing the position bigger — but that
+              inflates the swings by the same amount, so Sharpe barely
+              moves. That is why every verdict in this research is judged
+              on Sharpe, never on the headline return number.
+            </dd>
+            <dd className="mt-1">
+              Rough scale, taken from the same bar this project has held
+              every idea to rather than a generic rule of thumb: below 0.2
+              is treated as no real edge; 0.2–0.4 as marginal, present but
+              thin; 0.4 and above, together with a t-stat above 2.0, is the
+              bar this research called &quot;worth continuing.&quot; The live
+              number — financed Sharpe 0.29 — sits in the marginal band.
+              That is the honest label for this whole strategy, not
+              something to read past.
+            </dd>
+            <dd className="mt-1">
+              t-stat is a separate check on top of Sharpe: not &quot;how
+              good is the edge&quot; but &quot;how confident can we be this
+              isn&apos;t random noise,&quot; given how many days of data back
+              it. t=1.6 means real on the face of it, but not yet strong
+              enough to rule out luck — that needs roughly above 2. Every
+              idea tested for this project (a multi-speed trend blend, a
+              volume-exhaustion filter, a flip-confirmation delay) was
+              judged against this same pair of numbers, not against how
+              good one backtest run looked.
+            </dd>
+          </div>
+          <div>
             <dt className="font-bold text-ink">LONG / SHORT / FLAT, with a number</dt>
             <dd className="mt-0.5">
               Direction, and the size of the position as a fraction of account
