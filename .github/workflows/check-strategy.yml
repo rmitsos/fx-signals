@@ -22,6 +22,7 @@ on:
       - "check_universe_multispeed.py"
       - "check_universe_oanda.py"
       - "check_volume_exhaustion.py"
+      - "check_confirmation_delay.py"
       - "src/lib/fx/**"
       - "scripts/smoke-fetch.mjs"
       - ".github/workflows/check-strategy.yml"
@@ -74,6 +75,14 @@ jobs:
         if: always()
         run: python3 check_volume_exhaustion.py
 
+      # Does requiring a flip to hold for N days before acting on it reduce
+      # whipsaw enough to be worth the later, slower entries and exits? Pure
+      # price data, so this runs on the full 14-instrument universe,
+      # currencies included.
+      - name: Confirmation-delay test
+        if: always()
+        run: python3 check_confirmation_delay.py
+
       # JS and Python are proven to agree on the MATH by test_universe_parity.py,
       # which runs on synthetic prices and needs no network. What that test
       # cannot check is whether prices.js's Yahoo fetch itself works on a real
@@ -96,4 +105,5 @@ jobs:
             universe_multispeed_output.txt
             universe_oanda_output.txt
             volume_exhaustion_output.txt
+            confirmation_delay_output.txt
           if-no-files-found: warn
